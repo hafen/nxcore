@@ -1,0 +1,17 @@
+Package: nxcore
+Type: Package
+Title: Utilities for working with NxCore data
+Version: 0.1
+Date: 2015-03-18
+Author: Ryan Hafen, Mike Kane
+Maintainer: Ryan Hafen <rhafen@gmail.com>
+Description: Utilities for working with NxCore data.
+License: BSD_3_clause + file LICENSE
+LazyLoad: yes
+LazyData: yes
+Depends:
+    R (>= 3.1)
+Suggests:
+    testthat (>= 0.8.1),
+    roxygen2 (>= 4.0.0)
+
