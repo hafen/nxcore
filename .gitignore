@@ -1,0 +1,5 @@
+\.DS_Store
+\.Rapp\.history
+_ignore
+*.sublime-project
+*.sublime-workspace
