@@ -37,3 +37,21 @@ process_cancellations <- function(x) {
   x
 }
 
+#' @export
+consolidate_taq_trades = function(x) {
+  time_split = split(1:nrow(x), x$time)
+  # Consolidate on second. Use the mean prices as the price.
+  x = foreach(inds=time_split, .combine=rbind) %dopar% {
+    xs = x[inds,]
+    data.frame(vwap=sum(xs$price*xs$size)/sum(xs$size),
+               max_price=max(xs$price),
+               min_price=min(xs$price), volume=sum(xs$size), date=xs$date[1],
+               time=xs$time[1])
+  }
+  x$date_time = paste(x$date, x$time)
+  x$date_time = strptime(x$date_time, "%Y%m%d %H:%M:%S")
+  x = x[order(x$date_time),]
+  x$price = x$vwap
+  x
+}
+
