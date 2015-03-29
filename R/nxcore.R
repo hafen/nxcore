@@ -87,6 +87,25 @@ NULL
 #' @keywords data
 NULL
 
+#' Russell 1000 and SP 500 Stocks
+#'
+#' @name russell_or_sp
+#' @docType data
+#' @description
+#' Ticker symbols for stocks in the Russell 1000 and SP 500
+#' @usage russell_or_sp
+#'
+#' @keywords data
+NULL
 
-
+#' Example TAQ data for Apple
+#'
+#' @name aapl_taq
+#' @docType data
+#' @description
+#' TAQ data for Apple from May 7, 2010
+#' @usage russell_or_sp
+#'
+#' @keywords data
+NULL
 
