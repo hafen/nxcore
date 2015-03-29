@@ -11,6 +11,7 @@ LazyLoad: yes
 LazyData: yes
 Depends:
     R (>= 3.1)
+    foreach
 Suggests:
     testthat (>= 0.8.1),
     roxygen2 (>= 4.0.0)
