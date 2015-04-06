@@ -10,8 +10,8 @@ License: BSD_3_clause + file LICENSE
 LazyLoad: yes
 LazyData: yes
 Depends:
-    R (>= 3.1)
-    foreach
+    R (>= 3.1),
+    foreach (>= 1.4.0)
 Suggests:
     testthat (>= 0.8.1),
     roxygen2 (>= 4.0.0)
