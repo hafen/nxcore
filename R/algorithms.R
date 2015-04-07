@@ -15,9 +15,13 @@ get_singleton_outliers <- function(x, thresh = 15, k = 3) {
   if(length(idx) == 0) {
     NULL
   } else {
+    cond_idx <- x$td_cond_idx[idx][oidx]
+    cond_idx_name <- paste(cond_idx, ": ", td_cond_idx_lookup$name[match(cond_idx, td_cond_idx_lookup$nxid)], sep = "")
+
     data.frame(time = x$sys_datetime[idx][oidx],
       price = x$td_price[idx][oidx],
-      cond_idx = x$td_cond_idx[idx][oidx],
+      cond_idx = cond_idx,
+      cond_idx_name = cond_idx_name,
       dev = rr[oidx],
       pct_dev = rr[oidx] / rmd[oidx] * 100)
   }
@@ -42,6 +46,8 @@ get_mini_flash_crashes <- function(x) {
 
   get_flash <- function(down = TRUE, pp, tt) {
     nn <- length(pp)
+    if(nn < 2)
+      return(NULL)
 
     # build a sequence that is
     # zero when non-increasing (when down = TRUE)
