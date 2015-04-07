@@ -104,8 +104,50 @@ NULL
 #' @docType data
 #' @description
 #' TAQ data for Apple from May 7, 2010
-#' @usage russell_or_sp
+#' @usage aapl_taq
 #'
 #' @keywords data
+NULL
+
+
+
+
+
+
+#' Symbol name lookup tables
+#'
+#' @name symb_b
+#' @rdname symb
+#' @docType data
+#' @description
+#' Tables used to look up symbol names for different security types
+#' @usage symb_b, symb_e, symb_f, symb_i, symb_m, symb_p, symb_z
+#'
+#' @keywords data
+NULL
+
+
+#' @name symb_e
+#' @rdname symb
+NULL
+
+#' @name symb_f
+#' @rdname symb
+NULL
+
+#' @name symb_i
+#' @rdname symb
+NULL
+
+#' @name symb_m
+#' @rdname symb
+NULL
+
+#' @name symb_p
+#' @rdname symb
+NULL
+
+#' @name symb_z
+#' @rdname symb
 NULL
 
