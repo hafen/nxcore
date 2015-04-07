@@ -85,8 +85,10 @@ simple_lookup <- function(x, ltab) {
 
 lookup_w_exg <- function(x, exg, ltab, name = "") {
 
-  ltab <- subset(ltab, !duplicated(symbol))
-  res <- ltab$name[match(x, ltab$symbol)]
+  tb <- table(ltab$symbol)
+
+  ltab2 <- subset(ltab, symbol %in% names(tb[tb == 1]))
+  res <- ltab2$name[match(x, ltab2$symbol)]
 
   if(is.null(exg)) {
     message(name, " symbols are uniquely defined by exchange and symbol and exchange was not specified... symbols that are not unique across all exchanges will not be matched")
@@ -208,18 +210,17 @@ get_names_m <- function(x, exg = NULL) {
 }
 
 get_names_o <- function(x, exg = NULL) {
-  tmp <- strsplit(x, ",")
-  nm <- sapply(tmp, "[[", 1)
-  nm <- gsub("^o", "", nm)
+  symb <- gsub("([A-Z0-9 ]+),.*", "\\1", x)
+  # need to get right exg for the symbol
+  exg <- symb_o$exg[match(symb, symb_o$symbol)]
+  res <- rep("", length(x))
 
-  res <- get_names_e(nm, exg)
-  idx <- is.na(res)
-  res[!idx] <- paste(res[!idx], "(equity option)")
-  if(length(which(idx)) > 0) {
-    res[idx] <- get_names_i(nm[idx], exg)
-    idx2 <- which(!is.na(res[idx]))
-    res[idx][idx2] <- paste(res[idx][idx2], "(index option)")
-  }
+  idx <- symb_o$prefix == "e"
+  if(length(which(idx)) > 0)
+    res[idx] <- paste(get_names_e(symb[idx], exg[idx]), "(equity option)")
+
+  if(length(which(!idx)) > 0)
+    res[!idx] <- paste(get_names_i(symb[!idx], exg[!idx]), "(index option)")
 
   res
 }

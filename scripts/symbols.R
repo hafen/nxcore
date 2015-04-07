@@ -157,9 +157,49 @@ gsub("(.*) [0-9]+\\.[0-9]+ [CP]", "\\1", head(symb_o$name))
 
 x <- subset(trade_summ, type == "(o) Eq/Idx Opt Root")$symbol
 
-tmp <- strsplit(x, ",")
+tmp <- strsplit(symb_o$name, ":| ")
+table(sapply(tmp, length))
+head(symb_o[which(sapply(tmp, length) == 6),])
 
-x2 <- sapply(tmp, "[[", 1)
+exgs <- sapply(tmp, "[[", 1)
+nms <- sapply(tmp, "[[", 2)
+pre <- substr(nms, 1, 1)
+nms <- gsub("^[ei]", "", nms)
+
+# # instead of messing with actual symbols, get it from name as above
+# tmp <- strsplit(symb_o$symbol, ",")
+# nms <- sapply(tmp, "[[", 1)
+# nms <- gsub(" +$", "", nms)
+# nc <- nchar(nms)
+# table(substr(nms, nc, nc))
+# nms <- gsub(" [A-Z]$", "", nms)
+# nms <- gsub(" +$", "", nms)
+
+tmp <- data.frame(exgs = exgs, nms = nms)
+tmp <- tmp[!duplicated(tmp),]
+
+subset(tmp, nms == "FB")
+nrow(tmp)
+length(unique(tmp$nms))
+
+symb_o$exg <- exgs
+symb_o$symbol <- nms
+symb_o$prefix <- pre
+
+symb_o <- symb_o[,c("exg", "symbol", "prefix")]
+symb_o <- symb_o[!duplicated(symb_o),]
+rownames(symb_o) <- NULL
+
+save(symb_o, file = "data/symb_o.rda")
+
+
+# note: the exchange for every option symbol is OPRA
+# instead we replace it with the exchange on which to look up the option symbol
+
+
+
+
+
 x2 <- gsub("^o", "", x2)
 x3 <- unique(x2)
 

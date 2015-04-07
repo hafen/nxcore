@@ -110,7 +110,11 @@ exg_name <- c("NQEX", "NQAD", "NYSE", "AMEX", "CBOE", "ISEX", "PACF", "CINC", "P
 
 trade_summ$exg <- exg_name[trade_summ$exg_idx]
 
+x <- trade_summ$symbol
+exg <- trade_summ$exg
 trade_summ$name <- get_symbol_names(trade_summ$symbol, trade_summ$exg)
+
+# length(which(is.na(trade_summ$name)))
 
 types <- c("(o) Eq/Idx Opt Root", "(p) Future Option", "(e) Equity", "(m) Mutual Fund", "(z) Spreads", "(f) Future", "(i) Index", "(b) Bond", "(c) Currency/Spot")
 names(types) <- c("o", "p", "e", "m", "z", "f", "i", "b", "c")
@@ -118,9 +122,10 @@ names(types) <- c("o", "p", "e", "m", "z", "f", "i", "b", "c")
 ss <- substr(trade_summ$symbol, 1, 1)
 trade_summ$type <- types[ss]
 
-
 # write.csv(trade_summ, file = "/mount/team6/trade_summ.csv", row.names = FALSE)
 save(trade_summ, file = "~/Documents/Projects/NxCore/data/trade/trade_summ.Rdata")
+
+load("~/Documents/Projects/NxCore/data/trade/trade_summ.Rdata")
 
 ## subset the daily by symbol data to symbols of interest
 ##---------------------------------------------------------
@@ -136,16 +141,19 @@ res <- rhwatch(
   map = map, reduce = 0,
   readback = FALSE)
 
+##
+##---------------------------------------------------------
+
 library(datadr)
 library(trelliscope)
 library(parallel)
+library(nxcore)
 
-symb_summ <- ddf(hdfsConn("/user/rhafen/trade_symbol_summary_sub"))
-
-symb_summ <- convert(symb_summ, localDiskConn("~/Documents/Projects/NxCore/data/trade/symb_summ", nBins = 20))
+# symb_summ <- ddf(hdfsConn("/user/rhafen/trade_symbol_summary_sub"))
+# symb_summ <- convert(symb_summ, localDiskConn("~/Documents/Projects/NxCore/data/trade/symb_summ", nBins = 20))
 
 options(defaultLocalDiskControl = localDiskControl(makeCluster(4)))
-symb_summ <- updateAttributes(symb_summ)
+symb_summ <- ddf(localDiskConn("~/Documents/Projects/NxCore/data/trade/symb_summ"))
 
 x <- symb_summ[[1]]$value
 
@@ -195,7 +203,7 @@ makeDisplay(symb_summ, name = "test",
   width = 700, height = 400,
   state = list(labels = c("symbol", "exchange", "type", "name")))
 
-
+# state doesn't work
 # make updateDisplay
 # fix cog problem
 # fix k/v return problem
