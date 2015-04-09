@@ -144,20 +144,24 @@ res <- rhwatch(
 ##
 ##---------------------------------------------------------
 
+# symb_summ <- ddf(hdfsConn("/user/rhafen/trade_symbol_summary_sub"))
+# symb_summ <- convert(symb_summ, localDiskConn("~/Documents/Projects/NxCore/data/trade/symb_summ", nBins = 20))
+
 library(datadr)
 library(trelliscope)
 library(parallel)
 library(nxcore)
 
-# symb_summ <- ddf(hdfsConn("/user/rhafen/trade_symbol_summary_sub"))
-# symb_summ <- convert(symb_summ, localDiskConn("~/Documents/Projects/NxCore/data/trade/symb_summ", nBins = 20))
+vdbConn("~/Documents/Projects/NxCore/vdb")
+
+types <- c("(o) Eq/Idx Opt Root", "(p) Future Option", "(e) Equity", "(m) Mutual Fund", "(z) Spreads", "(f) Future", "(i) Index", "(b) Bond", "(c) Currency/Spot")
+names(types) <- c("o", "p", "e", "m", "z", "f", "i", "b", "c")
 
 options(defaultLocalDiskControl = localDiskControl(makeCluster(4)))
 symb_summ <- ddf(localDiskConn("~/Documents/Projects/NxCore/data/trade/symb_summ"))
 
-x <- symb_summ[[1]]$value
-
 a <- symb_summ[["07/0b78d1165e469eb48666be0dc9560cc8.Rdata"]]
+# a <- symb_summ[[1]]
 k <- a$key
 v <- a$value
 
@@ -170,13 +174,6 @@ panelFn <- function(k, v) {
       url = url)
   list(k, p)
 }
-
-k <- symb_summ[[1]]$key
-v <- symb_summ[[1]]$value
-
-types <- c("(o) Eq/Idx Opt Root", "(p) Future Option", "(e) Equity", "(m) Mutual Fund", "(z) Spreads", "(f) Future", "(i) Index", "(b) Bond", "(c) Currency/Spot")
-names(types) <- c("o", "p", "e", "m", "z", "f", "i", "b", "c")
-
 
 cogFn <- function(k, v) {
   exg <- exg_lookup$code[as.integer(k[1])]
@@ -196,12 +193,45 @@ cogFn <- function(k, v) {
 
 # http://www.marketwatch.com/investing/stock/AAPL
 
-vdbConn("~/Documents/Projects/NxCore/vdb")
-
 makeDisplay(symb_summ, name = "test",
   panelFn = panelFn, cogFn = cogFn,
   width = 700, height = 400,
   state = list(labels = c("symbol", "exchange", "type", "name")))
+
+panelFn <- function(k, v) {
+  p <- figure(width = 700, height = 400) %>%
+    ly_points(date, n_canc / n, data = v, size = 8,
+      hover = list(date, n, n_canc, n_ins))
+  list(k, p)
+}
+
+cogFn <- function(k, v) {
+  exg <- exg_lookup$code[as.integer(k[1])]
+  tmp <- subset(v, date == "2014-02-14")
+  feb14pct <- NA
+  if(nrow(tmp) == 1)
+    feb14pct <- tmp$n_canc / tmp$n
+
+  list(k,
+  list(
+    symbol = cog(k[2]),
+    clean_symbol = cog(get_clean_symbol(k[2])),
+    exchange = cog(exg),
+    type = cog(types[substr(k[2], 1, 1)]),
+    name = cog(get_symbol_names(k[2], exg)),
+    feb14pct = cog(feb14pct) * 100,
+    sig_canc_days = cog(length(which(v$n_canc / v$n > 0.0001)))
+  ))
+}
+
+system.time(cogFn(k, v))
+system.time(kvApply(cogFn, symb_summ[[1]]))
+
+makeDisplay(symb_summ, name = "test2",
+  panelFn = panelFn, cogFn = cogFn,
+  width = 700, height = 400,
+  state = list(labels = c("symbol", "exchange", "type", "name")))
+
 
 # state doesn't work
 # make updateDisplay
