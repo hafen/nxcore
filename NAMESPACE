@@ -2,6 +2,7 @@
 
 export(consolidate_taq_trades)
 export(get_bit_matrix)
+export(get_clean_symbol)
 export(get_mini_flash_crashes)
 export(get_singleton_outliers)
 export(get_symbol_names)

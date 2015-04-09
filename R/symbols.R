@@ -83,12 +83,9 @@ simple_lookup <- function(x, ltab) {
   ltab$name[match(x, ltab$symbol)]
 }
 
-lookup_w_exg <- function(x, exg, ltab, name = "") {
+lookup_w_exg <- function(x, exg, ltab, ltabu, name = "") {
 
-  tb <- table(ltab$symbol)
-
-  ltab2 <- subset(ltab, symbol %in% names(tb[tb == 1]))
-  res <- ltab2$name[match(x, ltab2$symbol)]
+  res <- ltabu$name[match(x, ltabu$symbol)]
 
   if(is.null(exg)) {
     message(name, " symbols are uniquely defined by exchange and symbol and exchange was not specified... symbols that are not unique across all exchanges will not be matched")
@@ -194,11 +191,11 @@ get_names_p <- function(x, exg = NULL) {
 }
 
 get_names_e <- function(x, exg = NULL) {
-  lookup_w_exg(x, exg, symb_e, "equity")
+  lookup_w_exg(x, exg, symb_e, symb_e_unq, "equity")
 }
 
 get_names_i <- function(x, exg = NULL) {
-  lookup_w_exg(x, exg, symb_i, "index")
+  lookup_w_exg(x, exg, symb_i, symb_i_unq, "index")
 }
 
 get_names_b <- function(x, exg = NULL) {

@@ -30,6 +30,17 @@ subset(symb_i, symbol == "VWRL.IV")
 symb_i <- symb_i[,c("exg", "symbol", "name")]
 save(symb_i, file = "data/symb_i.rda")
 
+load("data/symb_i.rda")
+
+tb <- table(symb_i$symbol)
+symb_i_unq <- subset(symb_i, symbol %in% names(tb[tb == 1]))
+
+save(symb_i_unq, file = "data/symb_i_unq.rda")
+
+
+
+
+
 symb_e <- get_symbol_csv("e")
 nrow(symb_e)
 length(unique(paste(symb_e$exg, symb_e$symbol)))
@@ -55,6 +66,19 @@ symb_e$exg[symb_e$symbol == "AMD" & symb_e$exg == "NQSC"] <- "NYSE"
 
 symb_e <- symb_e[,c("exg", "symbol", "name")]
 save(symb_e, file = "data/symb_e.rda")
+
+
+load("data/symb_e.rda")
+
+tb <- table(symb_e$symbol)
+symb_e_unq <- subset(symb_e, symbol %in% names(tb[tb == 1]))
+
+save(symb_e_unq, file = "data/symb_e_unq.rda")
+
+
+
+
+
 
 symb_m <- get_symbol_csv("m")
 nrow(symb_m)
@@ -191,6 +215,7 @@ symb_o <- symb_o[!duplicated(symb_o),]
 rownames(symb_o) <- NULL
 
 save(symb_o, file = "data/symb_o.rda")
+
 
 
 # note: the exchange for every option symbol is OPRA
