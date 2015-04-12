@@ -5,6 +5,7 @@ library(xts)
 library(devtools)
 library(doMC)
 registerDoMC(cores=16)
+#registerDoMC(cores=10)
 
 document("..")
 col_types=c(rep("character",3), rep("numeric", 3), rep("character", 2))
@@ -27,7 +28,7 @@ x = x[x$symbol %in% sp$symbol,]
 # x is a data frame with a price, size, and symbol column.
 clean_and_normalize_transactions = function(x, on="minutes", k=1) {
   sp_split = split(1:nrow(x), x$symbol)
-  x = foreach(inds=sp_split, .combine=cbind) %do% {
+  x = foreach(inds=sp_split, .combine=cbind) %dopar% {
     xts(cbind(x$price[inds], x$size[inds]), order.by=x$date_time[inds])
   }
   psp = matrix(1:ncol(x), ncol=2, byrow=TRUE)
@@ -45,4 +46,8 @@ clean_and_normalize_transactions = function(x, on="minutes", k=1) {
 }
 
 sp_trades = clean_and_normalize_transactions(x, on="seconds", k=1)
-
+document("..")
+foreach(it = volume_window_gen(time(x)), .combine=rbind) %dopar% {
+  ci = cointegration_info(x[it,])
+  c(ci$p_value, ci$p_stat)
+}
