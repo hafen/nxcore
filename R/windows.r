@@ -7,8 +7,9 @@ volume_window_gen = function(sorted_times, interval) {
   start_inds = rep(NA, length(end_inds))
   start_inds[1] = 1
   for (i in 1:length(end_inds)) {
-    while ((sorted_times[end_inds[i]]-sorted_times[start_inds[i]]) >=
-            as.difftime(interval)){
+    while (!is.na(sorted_times[start_inds[i]]) &&
+           ((sorted_times[end_inds[i]]-sorted_times[start_inds[i]]) >=
+            as.difftime(interval, units="secs"))){
       start_inds[i] = start_inds[i] + 1
     }
     if (i < length(start_inds)) start_inds[i+1] = start_inds[i] + 1
@@ -34,7 +35,7 @@ proforma_window_gen = function(sorted_times, interval) {
     start_inds[i] = start_inds[i-1]
 
     while (sorted_times[end_inds[i]] - sorted_times[start_inds[i]] >
-           as.difftime(interval)) {
+           as.difftime(interval, units="secs")) {
       start_inds[i] = start_inds[i] + 1
     }
   }
