@@ -40,11 +40,12 @@ cointegration_p_matrix = function(x) {
 cointegration_info= function(x) {
   ps = cointegration_p_matrix(x)
   ret = NA
-  if (!is.na(ps)) {
+  if (inherits(ps, "Matrix")) {
     p_vals = suppressMessages(ps[upper.tri(ps)])
     ret = list(p_matrix=ps, 
          p_value=ks.test(p_vals, punif)$p.value,
          p_stat=100*sum(1-p_vals)/length(p_vals))
   }
+  ret
 }
 

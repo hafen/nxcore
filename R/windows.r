@@ -15,13 +15,13 @@ volume_window_gen = function(sorted_times, interval) {
     if (i < length(start_inds)) start_inds[i+1] = start_inds[i] + 1
   }
   ind=1
-  nextElem = function() {
+  nextEl = function() {
     if (ind > length(start_inds)) stop("StopIteration", call. = FALSE)
     ret = start_inds[ind]:end_inds[ind]
     ind <<- ind + 1
     ret
   }
-  it = list(nextElem=nextElem)
+  it = list(nextElem=nextEl)
   class(it) = c("abstractiter", "iter")
   it
 }
@@ -40,13 +40,13 @@ proforma_window_gen = function(sorted_times, interval) {
     }
   }
   ind = 1
-  nextElem = function() {
+  nextEl = function() {
     if (ind > length(start_inds)) stop("StopIteration", call. = FALSE)
     ret = start_inds[ind]:end_inds[ind]
     ind <<- ind + 1
     ret
   }
-  it = list(nextElem=nextElem)
+  it = list(nextElem=nextEl)
   class(it) = c("abstractiter", "iter")
   it
 }
