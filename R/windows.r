@@ -1,5 +1,5 @@
 #' @export
-volume_window_gen = function(sorted_times, interval) {
+volume_window_gen = function(sorted_times, interval, skip=1) {
   sorted_times=sorted_times
   interval=interval
   end_ind = max(which(sorted_times <= sorted_times[1] + interval))
@@ -18,7 +18,7 @@ volume_window_gen = function(sorted_times, interval) {
   nextEl = function() {
     if (ind > length(start_inds)) stop("StopIteration", call. = FALSE)
     ret = start_inds[ind]:end_inds[ind]
-    ind <<- ind + 1
+    ind <<- ind + skip
     ret
   }
   it = list(nextElem=nextEl)
@@ -27,7 +27,7 @@ volume_window_gen = function(sorted_times, interval) {
 }
 
 #' @export
-proforma_window_gen = function(sorted_times, interval) {
+proforma_window_gen = function(sorted_times, interval, skip=1) {
   end_inds = 2:(length(sorted_times))
   start_inds = rep(NA, length(end_inds))
   start_inds[1] = 1
@@ -43,7 +43,7 @@ proforma_window_gen = function(sorted_times, interval) {
   nextEl = function() {
     if (ind > length(start_inds)) stop("StopIteration", call. = FALSE)
     ret = start_inds[ind]:end_inds[ind]
-    ind <<- ind + 1
+    ind <<- ind + skip
     ret
   }
   it = list(nextElem=nextEl)
