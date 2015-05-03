@@ -19,8 +19,7 @@ cointegration_p_matrix = function(x) {
         # Fit the cointegration.
         y = matrix(x[it[1,j]], ncol=1)
         x = matrix(x[it[2,j]], ncol=1)
-        # START HERE
-        resids = y - x %*% solve(crossprod(x)) %*% crossprod(x, y)
+        resids = na.omit(y - x %*% solve(crossprod(x)) %*% crossprod(x, y))
         val=as.vector(unitrootTest(resids, type="nc")@test$p.value[1])
         m[it[1,j], it[2,j]] = val
       }
