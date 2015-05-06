@@ -122,7 +122,7 @@ names(types) <- c("o", "p", "e", "m", "z", "f", "i", "b", "c")
 ss <- substr(trade_summ$symbol, 1, 1)
 trade_summ$type <- types[ss]
 
-# write.csv(trade_summ, file = "/mount/team6/trade_summ.csv", row.names = FALSE)
+# write.csv(trade_summ, file = "/team6/hafen/trade_summ2.csv", row.names = FALSE)
 save(trade_summ, file = "~/Documents/Projects/NxCore/data/trade/trade_summ.Rdata")
 
 load("~/Documents/Projects/NxCore/data/trade/trade_summ.Rdata")
@@ -193,7 +193,10 @@ cogFn <- function(k, v) {
 
 # http://www.marketwatch.com/investing/stock/AAPL
 
-makeDisplay(symb_summ, name = "test",
+panelFn(symb_summ[[1]]$key, symb_summ[[1]]$value)
+
+makeDisplay(symb_summ, name = "n_trades_vs_day",
+  desc = "Number of daily trades per symbol",
   panelFn = panelFn, cogFn = cogFn,
   width = 700, height = 400,
   state = list(labels = c("symbol", "exchange", "type", "name")))
@@ -227,14 +230,64 @@ cogFn <- function(k, v) {
 system.time(cogFn(k, v))
 system.time(kvApply(cogFn, symb_summ[[1]]))
 
-makeDisplay(symb_summ, name = "test2",
+makeDisplay(symb_summ, name = "pct_canc_vs_day",
+  desc = "Percentage of cancellations daily per symbol",
   panelFn = panelFn, cogFn = cogFn,
   width = 700, height = 400,
   state = list(labels = c("symbol", "exchange", "type", "name")))
 
+webConn("ubuntu", "10.1.93.205", name = "displays")
 
-# state doesn't work
 # make updateDisplay
-# fix cog problem
-# fix k/v return problem
+
+##
+##---------------------------------------------------------
+
+simple_symbol <- function(x, type = "e") {
+  if(type == "e") {
+    gsub("^e([A-Za-z0-9\\./]+),.*", "\\1", x)
+  } else if(type == "o") {
+    gsub("^o([A-Za-z0-9\\./]+),\\(opt_new\\).*", "\\1", x)
+  }
+}
+
+trade_summ_o <- subset(trade_summ, type == "(o) Eq/Idx Opt Root" & !grepl("index option", name))
+
+unique(simple_symbol(trade_summ_o$symbol, type = "o"))
+
+trade_summ_o$symb <- gsub("^o([A-Za-z0-9]+),\\(opt_new\\).*", "\\1", trade_summ_o$symbol)
+trade_summ_o$name <- gsub(" \\(equity option\\)", "", trade_summ_o$name)
+
+o_symb_tab <- trade_summ_o %>% group_by(symb, name) %>%
+  summarise(n = n(), n_trades = sum(n_trades)) %>%
+  ungroup() %>%
+  arrange(desc(n))
+
+head(o_symb_tab, 20)
+
+head(o_symb_tab %>% arrange(desc(n_trades)), 20)
+
+trade_summ_e <- subset(trade_summ, type == "(e) Equity")
+
+head(trade_summ_e %>% arrange(desc(n_trades)))
+
+figure() %>% ly_quantile(trade_summ_e$n_trades) %>% y_axis(log = TRUE)
+
+nrow(trade_summ_e)
+
+figure() %>% ly_quantile(trade_summ_e$n_days)
+
+nrow(subset(trade_summ_e, n_days >= 124))
+nrow(subset(trade_summ_e, n_days >= 100))
+
+trade_summ_e_full <- subset(trade_summ_e, n_days >= 124)
+
+unique(simple_symbol(trade_summ_e$symbol))
+
+trade_summ_e_full$symb <- simple_symbol(trade_summ_e_full$symbol)
+
+active_symbols <- trade_summ_e_full[,c("symb", "name")]
+
+save(active_symbols, file = "~/Documents/Projects/NxCore/data/trade/active_symbols.Rdata")
+
 

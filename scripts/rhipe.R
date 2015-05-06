@@ -2,7 +2,7 @@
 # run on vagrant vm connected to cluster
 
 # to run from os x
-# HADOOP_CONF_DIR=vagrant-xdata/hadoop/
+# HADOOP_CONF_DIR=~/Documents/Projects/NxCore/vagrant-xdata/hadoop/
 
 library(Rhipe)
 rhinit()
@@ -28,6 +28,22 @@ res <- rhwatch(
 
 a <- rhread("/user/rhafen/tmp_text")
 map.values <- sapply(a, "[[", 2)
+
+##
+##---------------------------------------------------------
+
+map <- expression({
+  for(ii in seq_along(map.keys))
+    rhcollect(map.keys[[ii]], map.values[[ii]])
+})
+
+res <- rhwatch(
+  input = rhfmt("/SummerCamp2015/nxcore/processed/trade/2014/02/20140202-r-00053.bz2", type = "text"),
+  output = "/user/rhafen/tmp_text2", map = map, readback = FALSE)
+
+
+
+
 
 ## system memory usage
 ##---------------------------------------------------------
