@@ -17,9 +17,10 @@ cointegration_p_matrix = function(x) {
                  dimnames=list(names(x), names(x)))
       for (j in 1:ncol(it)) {
         # Fit the cointegration.
-        y = matrix(x[it[1,j]], ncol=1)
-        x = matrix(x[it[2,j]], ncol=1)
-        resids = na.omit(y - x %*% solve(crossprod(x)) %*% crossprod(x, y))
+        y_vec = as.matrix(x)[,it[1,j],drop=FALSE]
+        x_vec = as.matrix(x)[,it[2,j],drop=FALSE]
+        resids = na.omit(y_vec - 
+          x_vec %*% solve(crossprod(x_vec)) %*% crossprod(x_vec, y_vec))
         val=as.vector(unitrootTest(resids, type="nc")@test$p.value[1])
         m[it[1,j], it[2,j]] = val
       }
