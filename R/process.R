@@ -37,14 +37,21 @@ process_cancellations <- function(x) {
   x
 }
 
-#' Consolidate prices at a single second resolution
+#' Consolidate prices at a specified resolution
 #' 
-#' @param x a data frame with columns named including sys_date, sys_time, 
-#' td_price, td_size.
+#' @param date a transaction date string
+#' @param time a transaction time string
+#' @param price a tranaction price
+#' @param size a transaction size
 #' @param date_format the format for the sys_date column (default is 
 #' "%Y-%m-%d").
 #' @param time_format the format for the syst_time column (default is
 #' "%H:%M:%S.%f").
+#' @param on the resolution to consolidate trades. The default is "seconds"
+#' and any resolution supported by the xts::endpoints function is valid.
+#' @param k along every k-th elements. For example if "seconds" is specified
+#' as the "on" parameter and k=2 then prices are consolidated for every 2
+#' seconds.
 #' @return an xts object with (vwapped) price, max price, min price, and volume.
 #' @examples
 #' # Consolidate TAQ trades...
@@ -53,19 +60,20 @@ process_cancellations <- function(x) {
 #'                          time_format="%H:%M:%S")
 #' # or FIX trades...
 #' data(aapl_fix)
-#' cfp = consolidate_prices(aapl_fix)
+#' cfp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time, 
+#'  aapl_fix$td_price, aapl_fix$td_size)
 #' @export
-consolidate_prices = function(x, date_format = "%Y-%m-%d", 
-  time_format="%H:%M:%OS") {
-  x$date_time = paste(x$sys_date, x$sys_time)
-  x$date_time = strptime(x$date_time, paste(date_format, time_format))
-  x_ts = xts(x[,c("td_price", "td_size")], order.by=x$date_time)
+consolidate_prices = function(date, time, price, size, 
+  date_format = "%Y-%m-%d", time_format="%H:%M:%OS", on="seconds", k=1) {
+  date_time = paste(date, time)
+  date_time = strptime(date_time, paste(date_format, time_format))
+  x_ts = xts(cbind(price, size), order.by=date_time)
   ret = period.apply(x_ts, endpoints(x_ts, on="seconds"),
     FUN = function(x) {
-      c(sum(x$td_price*x$td_size)/sum(x$td_size),
-        max(x$td_price),
-        min(x$td_price),
-        sum(x$td_size))
+      c(sum(x$price*x$size)/sum(x$size),
+        max(x$price),
+        min(x$price),
+        sum(x$size))
     })
   names(ret) = c("price", "max_price", "min_price", "volume")
   ret
