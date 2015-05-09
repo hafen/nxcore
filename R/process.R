@@ -37,6 +37,9 @@ process_cancellations <- function(x) {
   x
 }
 
+#' Consolidate trades at a single second resolution
+#' @param x a data frame with columns time price and size
+#' @return an xts matrix with price, max_price, min_price, and vwap prices
 #' @export
 consolidate_taq_trades = function(x) {
   time_split = split(1:nrow(x), x$time)
