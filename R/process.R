@@ -41,29 +41,33 @@ process_cancellations <- function(x) {
 #' 
 #' @param x a data frame with columns named including sys_date, sys_time, 
 #' td_price, td_size.
-#' @return an xts matrix with (vwapped) price, max price, min price, and volume.
+#' @param date_format the format for the sys_date column (default is 
+#' "%Y-%m-%d").
+#' @param time_format the format for the syst_time column (default is
+#' "%H:%M:%S.%f").
+#' @return an xts object with (vwapped) price, max price, min price, and volume.
 #' @examples
 #' # Consolidate TAQ trades...
 #' data(aapl_taq)
-#' ctp = consolidate_prices(aapl_taq)
+#' ctp = consolidate_prices(aapl_taq, date_format="%Y-%m-%d", 
+#'                          time_format="%H:%M:%S")
 #' # or FIX trades...
 #' data(aapl_fix)
 #' cfp = consolidate_prices(aapl_fix)
 #' @export
-consolidate_prices = function(x) {
-  time_split = split(1:nrow(x), x$sys_time)
-  # Consolidate on second. Use the mean prices as the price.
-  if (is.null(getDoParName())) registerDoSEQ()
-  x = foreach(inds=time_split, .combine=rbind) %dopar% {
-    xs = x[inds,]
-    data.frame(price=sum(xs$price*xs$td_size)/sum(xs$td_size),
-               max_price=max(xs$td_price),
-               min_price=min(xs$td_price), volume=sum(xs$td_size), 
-               date=xs$sys_date[1], time=xs$sys_time[1])
-  }
+consolidate_prices = function(x, date_format = "%Y-%m-%d", 
+  time_format="%H:%M:%OS") {
   x$date_time = paste(x$sys_date, x$sys_time)
-  x$date_time = strptime(x$date_time, "%Y%m%d %H:%M:%S")
-  x = x[order(x$date_time),]
-  x
+  x$date_time = strptime(x$date_time, paste(date_format, time_format))
+  x_ts = xts(x[,c("td_price", "td_size")], order.by=x$date_time)
+  ret = period.apply(x_ts, endpoints(x_ts, on="seconds"),
+    FUN = function(x) {
+      c(sum(x$td_price*x$td_size)/sum(x$td_size),
+        max(x$td_price),
+        min(x$td_price),
+        sum(x$td_size))
+    })
+  names(ret) = c("price", "max_price", "min_price", "volume")
+  ret
 }
 
