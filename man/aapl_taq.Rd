@@ -8,7 +8,7 @@
 aapl_taq
 }
 \description{
-TAQ data for Apple from May 7, 2010
+TAQ data for Apple from May 7, 2010.
 }
 \keyword{data}
 

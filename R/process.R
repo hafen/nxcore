@@ -37,24 +37,33 @@ process_cancellations <- function(x) {
   x
 }
 
-#' Consolidate trades at a single second resolution
-#' @param x a data frame with columns time price and size
-#' @return an xts matrix with price, max_price, min_price, and vwap prices
+#' Consolidate prices at a single second resolution
+#' 
+#' @param x a data frame with columns named including sys_date, sys_time, 
+#' td_price, td_size.
+#' @return an xts matrix with (vwapped) price, max price, min price, and volume.
+#' @examples
+#' # Consolidate TAQ trades...
+#' data(aapl_taq)
+#' ctp = consolidate_prices(aapl_taq)
+#' # or FIX trades...
+#' data(aapl_fix)
+#' cfp = consolidate_prices(aapl_fix)
 #' @export
-consolidate_taq_trades = function(x) {
-  time_split = split(1:nrow(x), x$time)
+consolidate_prices = function(x) {
+  time_split = split(1:nrow(x), x$sys_time)
   # Consolidate on second. Use the mean prices as the price.
+  if (is.null(getDoParName())) registerDoSEQ()
   x = foreach(inds=time_split, .combine=rbind) %dopar% {
     xs = x[inds,]
-    data.frame(vwap=sum(xs$price*xs$size)/sum(xs$size),
-               max_price=max(xs$price),
-               min_price=min(xs$price), volume=sum(xs$size), date=xs$date[1],
-               time=xs$time[1])
+    data.frame(price=sum(xs$price*xs$td_size)/sum(xs$td_size),
+               max_price=max(xs$td_price),
+               min_price=min(xs$td_price), volume=sum(xs$td_size), 
+               date=xs$sys_date[1], time=xs$sys_time[1])
   }
-  x$date_time = paste(x$date, x$time)
+  x$date_time = paste(x$sys_date, x$sys_time)
   x$date_time = strptime(x$date_time, "%Y%m%d %H:%M:%S")
   x = x[order(x$date_time),]
-  x$price = x$vwap
   x
 }
 

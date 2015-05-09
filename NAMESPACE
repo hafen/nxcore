@@ -3,7 +3,7 @@
 export(carry_price_forward)
 export(cointegration_info)
 export(cointegration_p_matrix)
-export(consolidate_taq_trades)
+export(consolidate_prices)
 export(get_bit_matrix)
 export(get_clean_symbol)
 export(get_mini_flash_crashes)
