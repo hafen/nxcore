@@ -2,8 +2,20 @@
 #' Get the pairwise matrix of p-values testing for cointegration 
 #'
 #' @param x a data.frame, matrix, or xts object
-#' @return An upper triangular matrix where each entry corresponds to the result
-#'         of McKinnons's test assuming no intercept or time trend.
+#' @return An upper triangular matrix where each entry corresponds to the 
+#' p-value from McKinnons's test assuming no intercept or time trend.
+#' @examples
+#' data(aapl_fix)
+#' data(a_fix)
+#' aapl_cons = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time, 
+#'  aapl_fix$td_price, aapl_fix$td_size)
+#' a_cons = consolidate_prices(a_fix$sys_date, a_fix$sys_time, 
+#'  a_fix$td_price, a_fix$td_size)
+#' # Make the times for AAPL overlap A. 
+#' time(aapl_cons) = time(a_cons)[1:nrow(aapl_cons)]
+#' trades = merge(aapl_cons$price, a_cons$price)
+#' names(trades) = c("aapl", "a")
+#' cointegration_p_matrix(trades)
 #' @export
 cointegration_p_matrix = function(x) {
   r = NA
@@ -39,6 +51,18 @@ cointegration_p_matrix = function(x) {
 #'         (null is uniformity), and a measure of the "cointegratedness" of
 #'         the time series vectors (100 indicates all are cointegrated zero
 #'         indicates they are all independent).
+#' @examples
+#' data(aapl_fix)
+#' data(a_fix)
+#' aapl_cons = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time, 
+#'  aapl_fix$td_price, aapl_fix$td_size)
+#' a_cons = consolidate_prices(a_fix$sys_date, a_fix$sys_time, 
+#'  a_fix$td_price, a_fix$td_size)
+#' # Make the times for AAPL overlap A. 
+#' time(aapl_cons) = time(a_cons)[1:nrow(aapl_cons)]
+#' trades = merge(aapl_cons$price, a_cons$price)
+#' names(trades) = c("aapl", "a")
+#' cointegration_info(trades)
 #' @export
 cointegration_info= function(x) {
   ps = cointegration_p_matrix(x)

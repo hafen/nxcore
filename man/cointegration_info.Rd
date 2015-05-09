@@ -19,4 +19,17 @@ a list containting the pairwise cointegration p-values, the
 \description{
 Get cointegration information for time series data
 }
+\examples{
+data(aapl_fix)
+data(a_fix)
+aapl_cons = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time,
+ aapl_fix$td_price, aapl_fix$td_size)
+a_cons = consolidate_prices(a_fix$sys_date, a_fix$sys_time,
+ a_fix$td_price, a_fix$td_size)
+# Make the times for AAPL overlap A.
+time(aapl_cons) = time(a_cons)[1:nrow(aapl_cons)]
+trades = merge(aapl_cons$price, a_cons$price)
+names(trades) = c("aapl", "a")
+cointegration_info(trades)
+}
 

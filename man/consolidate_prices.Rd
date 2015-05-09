@@ -2,26 +2,47 @@
 % Please edit documentation in R/process.R
 \name{consolidate_prices}
 \alias{consolidate_prices}
-\title{Consolidate prices at a single second resolution}
+\title{Consolidate prices at a specified resolution}
 \usage{
-consolidate_prices(x)
+consolidate_prices(date, time, price, size, date_format = "\%Y-\%m-\%d",
+  time_format = "\%H:\%M:\%OS", on = "seconds", k = 1)
 }
 \arguments{
-\item{x}{a data frame with columns named including sys_date, sys_time,
-td_price, td_size.}
+\item{date}{a transaction date string}
+
+\item{time}{a transaction time string}
+
+\item{price}{a tranaction price}
+
+\item{size}{a transaction size}
+
+\item{date_format}{the format for the sys_date column (default is
+"%Y-%m-%d").}
+
+\item{time_format}{the format for the syst_time column (default is
+"%H:%M:%S.%f").}
+
+\item{on}{the resolution to consolidate trades. The default is "seconds"
+and any resolution supported by the xts::endpoints function is valid.}
+
+\item{k}{along every k-th elements. For example if "seconds" is specified
+as the "on" parameter and k=2 then prices are consolidated for every 2
+seconds.}
 }
 \value{
-an xts matrix with (vwapped) price, max price, min price, and volume.
+an xts object with (vwapped) price, max price, min price, and volume.
 }
 \description{
-Consolidate prices at a single second resolution
+Consolidate prices at a specified resolution
 }
 \examples{
 # Consolidate TAQ trades...
 data(aapl_taq)
-ctp = consolidate_prices(aapl_taq)
+ctp = consolidate_prices(aapl_taq, date_format="\%Y-\%m-\%d",
+                         time_format="\%H:\%M:\%S")
 # or FIX trades...
 data(aapl_fix)
-cfp = consolidate_prices(aapl_fix)
+cfp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time,
+ aapl_fix$td_price, aapl_fix$td_size)
 }
 
