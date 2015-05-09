@@ -103,16 +103,31 @@ NULL
 #' @name aapl_taq
 #' @docType data
 #' @description
-#' TAQ data for Apple from May 7, 2010
+#' TAQ data for Apple from May 7, 2010.
 #' @usage aapl_taq
-#'
 #' @keywords data
 NULL
 
 
+#' Example FIX data for Agilent Technologies Inc
+#'
+#' @name a_fix
+#' @docType data
+#' @description
+#' FIX data for Agilent from February 3, 2014.
+#' @usage a_fix
+#' @keywords data
+NULL
 
-
-
+#' Example FIX data for Apple
+#'
+#' @name aapl_fix
+#' @docType data
+#' @description
+#' FIX data for Appple from February 3, 2014.
+#' @usage aapl_fix
+#' @keywords data
+NULL
 
 #' Symbol name lookup tables
 #'
