@@ -3,7 +3,7 @@
 #'
 #' @param x a data.frame, matrix, or xts object
 #' @return An upper triangular matrix where each entry corresponds to the 
-#' p-value from McKinnons's test assuming no intercept or time trend.
+#' p-value from McKinnons's test assuming no time trend.
 #' @examples
 #' data(aapl_fix)
 #' data(a_fix)
