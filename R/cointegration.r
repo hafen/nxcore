@@ -30,9 +30,15 @@ cointegration_p_matrix = function(x) {
       for (j in 1:ncol(it)) {
         # Fit the cointegration.
         y_vec = as.matrix(x)[,it[1,j],drop=FALSE]
-        x_vec = as.matrix(x)[,it[2,j],drop=FALSE]
-        resids = na.omit(y_vec - 
-          x_vec %*% solve(crossprod(x_vec)) %*% crossprod(x_vec, y_vec))
+        x_vec = cbind(as.matrix(x)[,it[2,j],drop=FALSE], rep(1, nrow(y_vec)))
+        qr_x = Matrix::qr(x_vec)
+        if (qr_x$rank < 2) {
+          x_vec = x_vec[, 1, drop=FALSE]
+          qr_x = Matrix::qr(x_vec)
+        }
+        qr_solve = qr.solve(x_vec, y_vec)
+        qr_coef = qr.coef(qr_x, y_vec)
+        resids = na.omit(y_vec - x_vec %*% qr_coef)
         val=as.vector(unitrootTest(resids, type="nc")@test$p.value[1])
         m[it[1,j], it[2,j]] = val
       }
