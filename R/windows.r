@@ -1,5 +1,7 @@
 #' @export
 volume_window_gen = function(sorted_times, interval, skip=1) {
+  if (sorted_times[2] < sorted_times[1]) 
+    stop("volume_window_gen expects times sorted in ascending order.")
   end_ind = max(which(sorted_times <= sorted_times[1] + interval))
   end_inds = end_ind:length(sorted_times)
   start_inds = rep(NA, length(end_inds))
