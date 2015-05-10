@@ -21,7 +21,7 @@ realized_volatility = function(price, interval=minutes(5),
   log_price = log(price)
   log_diff_price = na.omit(diff(log_price))
   if (is.null(getDoParName())) registerDoSEQ()
-  ret=foreach(it=volume_window_gen(time(log_diff_price), interval), 
+  ret=foreach(it=inclusive_window_gen(time(log_diff_price), interval), 
     .combine=rbind) %dopar% {
     ldp = log_diff_price[it]
     data.frame(
