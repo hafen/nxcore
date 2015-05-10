@@ -2,7 +2,7 @@
 % Please edit documentation in R/utilities.r
 \name{carry_price_forward}
 \alias{carry_price_forward}
-\title{Carry prices forward}
+\title{Carry price forward}
 \usage{
 carry_price_forward(x)
 }
@@ -15,6 +15,6 @@ an xts object where NA's are replace by the last valid value. Note
         in the result.
 }
 \description{
-Carry prices forward
+Carry price forward
 }
 
