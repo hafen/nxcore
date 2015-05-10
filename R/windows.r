@@ -1,14 +1,12 @@
 #' @export
 volume_window_gen = function(sorted_times, interval, skip=1) {
-  sorted_times=sorted_times
-  interval=interval
   end_ind = max(which(sorted_times <= sorted_times[1] + interval))
   end_inds = end_ind:length(sorted_times)
   start_inds = rep(NA, length(end_inds))
   start_inds[1] = 1
   for (i in 1:length(end_inds)) {
     while (!is.na(sorted_times[start_inds[i]]) &&
-           ((sorted_times[end_inds[i]]-sorted_times[start_inds[i]]) >=
+           ((sorted_times[end_inds[i]]-sorted_times[start_inds[i]]) <=
             as.difftime(interval, units="secs"))){
       start_inds[i] = start_inds[i] + 1
     }

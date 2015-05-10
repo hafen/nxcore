@@ -8,13 +8,13 @@ consolidate_prices(date, time, price, size, date_format = "\%Y-\%m-\%d",
   time_format = "\%H:\%M:\%OS", on = "seconds", k = 1)
 }
 \arguments{
-\item{date}{a transaction date string}
+\item{date}{transaction date strings}
 
-\item{time}{a transaction time string}
+\item{time}{transaction time strings}
 
-\item{price}{a tranaction price}
+\item{price}{a tranaction prices}
 
-\item{size}{a transaction size}
+\item{size}{a transaction sizes}
 
 \item{date_format}{the format for the sys_date column (default is
 "%Y-%m-%d").}
@@ -38,8 +38,9 @@ Consolidate prices at a specified resolution
 \examples{
 # Consolidate TAQ trades...
 data(aapl_taq)
-ctp = consolidate_prices(aapl_taq, date_format="\%Y-\%m-\%d",
-                         time_format="\%H:\%M:\%S")
+ctp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time,
+ aapl_fix$td_price, aapl_fix$td_size, date_format="\%Y-\%m-\%d",
+ time_format="\%H:\%M:\%S")
 # or FIX trades...
 data(aapl_fix)
 cfp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time,

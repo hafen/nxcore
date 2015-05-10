@@ -39,10 +39,10 @@ process_cancellations <- function(x) {
 
 #' Consolidate prices at a specified resolution
 #' 
-#' @param date a transaction date string
-#' @param time a transaction time string
-#' @param price a tranaction price
-#' @param size a transaction size
+#' @param date transaction date strings
+#' @param time transaction time strings
+#' @param price a tranaction prices
+#' @param size a transaction sizes
 #' @param date_format the format for the sys_date column (default is 
 #' "%Y-%m-%d").
 #' @param time_format the format for the syst_time column (default is
@@ -56,8 +56,9 @@ process_cancellations <- function(x) {
 #' @examples
 #' # Consolidate TAQ trades...
 #' data(aapl_taq)
-#' ctp = consolidate_prices(aapl_taq, date_format="%Y-%m-%d", 
-#'                          time_format="%H:%M:%S")
+#' ctp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time, 
+#'  aapl_fix$td_price, aapl_fix$td_size, date_format="%Y-%m-%d", 
+#'  time_format="%H:%M:%S")
 #' # or FIX trades...
 #' data(aapl_fix)
 #' cfp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time, 

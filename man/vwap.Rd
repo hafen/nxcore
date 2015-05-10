@@ -11,6 +11,8 @@ vwap(price, size, date_time, on = "minutes", k = 1)
 
 \item{size}{the number of products transacted.}
 
+\item{date_time}{the date-times for the tranactions}
+
 \item{on}{the interval to find the average over.}
 
 \item{k}{along every k elements.}
@@ -21,5 +23,12 @@ an xts object with the volume-weighted average price for the
 }
 \description{
 Calculated the VWAP for a specified interval
+}
+\examples{
+data(aapl_fix)
+aapl_fix$dt_string = paste(aapl_fix$sys_date, aapl_fix$sys_time)
+aapl_fix$dt = strptime(aapl_fix$dt_string, "\%Y-\%m-\%d \%H:\%M:\%OS")
+# Minute-aggregated vwap prices.
+minute_prices = vwap(aapl_fix$td_price, aapl_fix$td_size, aapl_fix$dt)
 }
 
