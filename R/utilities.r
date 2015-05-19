@@ -93,7 +93,8 @@ carry_price_forward = function(x) {
 #' @export
 carry_prices_forward = function(x, na.omit=TRUE) {
   if (is.null(getDoParName())) registerDoSEQ()
-  ret = foreach(1:ncol(x), .combine=cbind) %dopar%  carry_price_foward(x[,j])
+  ret = foreach(j=1:ncol(x), .combine=cbind) %dopar%  carry_price_forward(x[,j])
   if (na.omit) ret = na.omit(ret)
+  colnames(ret) = colnames(x)
   ret
 }
