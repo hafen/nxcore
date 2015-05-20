@@ -11,7 +11,8 @@ cointegration_p_matrix(x)
 }
 \value{
 An upper triangular matrix where each entry corresponds to the
-p-value from McKinnons's test assuming no time trend.
+p-value from McKinnons's test assuming no time trend. Note that if one
+stock in a pair-wise cointegration is constant the return value will be 1.
 }
 \description{
 Get the pairwise matrix of p-values testing for cointegration
