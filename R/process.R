@@ -69,12 +69,12 @@ consolidate_prices = function(date, time, price, size,
   date_time = paste(date, time)
   date_time = strptime(date_time, paste(date_format, time_format))
   x_ts = xts(cbind(price, size), order.by=date_time)
-  ret = period.apply(x_ts, endpoints(x_ts, on="seconds"),
+  ret = period.apply(x_ts, endpoints(x_ts, on=on, k=k),
     FUN = function(x) {
-      c(sum(x$price*x$size)/sum(x$size),
-        max(x$price),
-        min(x$price),
-        sum(x$size))
+      c(sum(x$price*x$size, na.rm=TRUE)/sum(x$size, na.rm=TRUE),
+        max(x$price, na.rm=TRUE),
+        min(x$price, na.rm=TRUE),
+        sum(x$size, na.rm=TRUE))
     })
   names(ret) = c("price", "max_price", "min_price", "volume")
   ret
