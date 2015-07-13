@@ -49,7 +49,9 @@ process_cancellations <- function(x) {
 #' (default is "\%H:\%M:\%S.\%f").  
 #' @param on the resolution to consolidate trades. The default is "seconds"
 #' and any resolution supported by the xts::endpoints function is valid.
-#' @param k along every k-th elements. For example if "seconds" is specified as the "on" parameter and k=2 then prices are consolidated for every 2 seconds.
+#' @param k along every k-th elements. For example if "seconds" is specified 
+#' as the "on" parameter and k=2 then prices are consolidated for every 2 
+#' seconds.
 #' @return an xts object with (vwapped) price, max price, min price, and volume.
 #' @examples
 #' # Consolidate TAQ trades...

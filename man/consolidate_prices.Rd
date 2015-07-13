@@ -25,7 +25,9 @@ consolidate_prices(date, time, price, size, date_format = "\%Y-\%m-\%d",
 \item{on}{the resolution to consolidate trades. The default is "seconds"
 and any resolution supported by the xts::endpoints function is valid.}
 
-\item{k}{along every k-th elements. For example if "seconds" is specified as the "on" parameter and k=2 then prices are consolidated for every 2 seconds.}
+\item{k}{along every k-th elements. For example if "seconds" is specified
+as the "on" parameter and k=2 then prices are consolidated for every 2
+seconds.}
 }
 \value{
 an xts object with (vwapped) price, max price, min price, and volume.
