@@ -36,7 +36,11 @@ inclusive_window_gen = function(sorted_times, interval=minutes(5), skip=1) {
     ind <<- ind + skip
     ret
   }
-  it = list(nextElem=nextEl)
+  randEl = function() {
+    rand_ind = sample(1:length(start_inds), 1)
+    start_inds[rand_ind]:end_inds[rand_ind]
+  }
+  it = list(nextElem=nextEl, randElem=randEl)
   class(it) = c("abstractiter", "iter")
   it
 }
@@ -79,6 +83,10 @@ carry_forward_window_gen = function(sorted_times, interval, skip=1) {
     ret = start_inds[ind]:end_inds[ind]
     ind <<- ind + skip
     ret
+  }
+  randEl = function() {
+    rand_ind = sample(1:length(start_inds), 1)
+    start_inds[rand_ind]:end_inds[rand_ind]
   }
   it = list(nextElem=nextEl)
   class(it) = c("abstractiter", "iter")
