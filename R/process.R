@@ -80,3 +80,26 @@ consolidate_prices = function(date, time, price, size,
   ret
 }
 
+#' Register price information across a set of stocks.
+#'
+#' Takes a list of stocks from the output of consolidate prices, 
+#' registers them in time, and display them at the specified resolution.
+#' @param x the list of stocks with a column "price"
+#' @param on the resolution to consolidate trades. The default is "seconds"
+#' and any resolution supported by the xts::endpoints function is valid.
+#' @param k along every k-th elements. For example if "seconds" is specified 
+#' as the "on" parameter and k=2 then prices are consolidated for every 2 
+#' seconds.
+#' @export
+register_prices = function(x, on="seconds", k=1) {
+  ts = foreach(ts=x, .combine=cbind) %do% ts[,"price"]
+  colnames(ts) = names(x)
+  ts = carry_prices_forward(ts)
+  ts= period.apply(ts, endpoints(ts, on=on, k=k),
+    function(ps) {
+      xts(matrix(apply(as.matrix(ps), 2, mean, na.rm=TRUE), nrow=1), 
+          order.by=time(ps[1]))
+    })
+  ts
+}
+

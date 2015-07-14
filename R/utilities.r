@@ -21,6 +21,7 @@ vwap = function(price, size, date_time, on="minutes", k=1) {
     function(x) sum(x$price*x$size, na.rm=TRUE)/sum(x$size, na.rm=TRUE))
 }
 
+#' @export
 log_rate_return = function(prices) {
   log(as.vector(prices[2:length(prices)])) /
     log(as.vector(prices[1:(length(prices)-1)]))
@@ -75,7 +76,7 @@ carry_price_forward = function(x) {
 #' Carry prices forward
 #' 
 #' @param x an xtx object that may have mulitple columns and NA's
-#' @param na.omit should the rows with NA's be omitted after carrying forward?
+#' @param na.rm should the rows with NA's be omitted after carrying forward?
 #' @return an xts object where NA's are replace by the last valid value. Note
 #'         that if NA's appear in the beginning of the series they will appear
 #'         in the result.
@@ -91,10 +92,10 @@ carry_price_forward = function(x) {
 #' names(trades) = c("aapl", "a")
 #' cointegration_p_matrix(trades)
 #' @export
-carry_prices_forward = function(x, na.omit=TRUE) {
+carry_prices_forward = function(x, na.rm=TRUE) {
   if (is.null(getDoParName())) registerDoSEQ()
   ret = foreach(j=1:ncol(x), .combine=cbind) %dopar%  carry_price_forward(x[,j])
-  if (na.omit) ret = na.omit(ret)
+  if (na.rm) ret = na.omit(ret)
   colnames(ret) = colnames(x)
   ret
 }
