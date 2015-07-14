@@ -75,7 +75,7 @@ cointegration_p_matrix = function(x) {
   r
 }
 
-#' Get cointegration information for time series data
+#' Get cointegration information for time series data.
 #'
 #' @param x a data.frame, matrix, or xts object
 #' @return a list containting the pairwise cointegration p-values, the 
@@ -101,10 +101,33 @@ cointegration_info= function(x) {
   ret = NA
   if (inherits(ps, "Matrix")) {
     p_vals = suppressMessages(ps[upper.tri(ps)])
-    ret = list(p_matrix=ps, 
-         p_value=ks.test(p_vals, punif)$p.value,
+    ret = list(p_matrix=p_vals, 
          p_stat=100*sum(1-p_vals)/length(p_vals))
   }
   ret
 }
 
+#' Get the cointegration measure for a rolling windows of stocks.
+#'
+#' @param x an xts object of stock prices.
+#' @param interval the width of the cointegration window.
+#' @export
+coint_measure = function(x, interval=minutes(5)) {
+  ci_info=try({
+    foreach(it=inclusive_window_gen(time(x), interval=interval)
+            ) %do% {
+      ret = try({
+        ci = cointegration_info(x[it,])
+        xts(ci$p_stat, order.by=time(x)[tail(it, 1)]) })
+      if (inherits(ret, "try-error")) {
+        print(it)
+        ret = NULL
+      }
+      ret
+    }
+  })
+  ret = Reduce(rbind, ci_info)
+  indexTZ(ret) = Sys.getenv("TZ")
+  colnames(ret) = "p_stat"
+  ret
+}

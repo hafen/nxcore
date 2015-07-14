@@ -2,7 +2,7 @@
 % Please edit documentation in R/cointegration.r
 \name{cointegration_info}
 \alias{cointegration_info}
-\title{Get cointegration information for time series data}
+\title{Get cointegration information for time series data.}
 \usage{
 cointegration_info(x)
 }
@@ -17,7 +17,7 @@ a list containting the pairwise cointegration p-values, the
         indicates they are all independent).
 }
 \description{
-Get cointegration information for time series data
+Get cointegration information for time series data.
 }
 \examples{
 data(aapl_fix)

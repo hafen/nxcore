@@ -2,6 +2,7 @@
 
 export(carry_forward_window_gen)
 export(carry_prices_forward)
+export(coint_measure)
 export(cointegration_info)
 export(cointegration_p_matrix)
 export(consolidate_prices)
