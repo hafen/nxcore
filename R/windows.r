@@ -40,7 +40,10 @@ inclusive_window_gen = function(sorted_times, interval=minutes(5), skip=1) {
     rand_ind = sample(1:length(start_inds), 1)
     start_inds[rand_ind]:end_inds[rand_ind]
   }
-  it = list(nextElem=nextEl, randElem=randEl)
+  saei = function() {
+    cbind(start_inds, end_inds)
+  }
+  it = list(nextElem=nextEl, randElem=randEl,start_and_end_inds=saei )
   class(it) = c("abstractiter", "iter")
   it
 }

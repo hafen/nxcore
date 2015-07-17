@@ -29,44 +29,32 @@ cointegration_p_matrix = function(x) {
                  dimnames=list(names(x), names(x)))
       for (j in 1:ncol(it)) {
         # Fit the cointegration.
-        val = try({
-          p_val = 1
-          y_vec = as.matrix(x)[,it[1,j],drop=FALSE]
-          x_vec = cbind(as.matrix(x)[,it[2,j],drop=FALSE], rep(1, nrow(y_vec)))
-
-          # Get the summed differences for y and x. If either is a vector
-          # of constant value, handle it.
-          x_sum_diff = sum(diff(x_vec[,1]))
-          y_sum_diff = sum(diff(y_vec))
-          if (x_sum_diff != 0 && y_sum_diff != 0) {
-            # Neither vector is constant. Test for cointegration.
+        p_val = 1
+        y_vec = as.matrix(x)[,it[1,j],drop=FALSE]
+        x_vec = cbind(as.matrix(x)[,it[2,j],drop=FALSE], rep(1, nrow(y_vec)))
+        # Get the summed differences for y and x. If either is a vector
+        # of constant value, handle it.
+        tol = 1e-8
+        x_sum_diff = sum(diff(x_vec[,1]))
+        y_sum_diff = sum(diff(y_vec))
+        if (x_sum_diff > tol && y_sum_diff > tol ) {
+          # Neither vector is constant. Test for cointegration.
+          qr_x = Matrix::qr(x_vec)
+          if (qr_x$rank < 2) {
+            x_vec = x_vec[, 1, drop=FALSE]
             qr_x = Matrix::qr(x_vec)
-            if (qr_x$rank < 2) {
-              x_vec = x_vec[, 1, drop=FALSE]
-              qr_x = Matrix::qr(x_vec)
-            }
-            qr_solve = qr.solve(x_vec, y_vec)
-            qr_coef = qr.coef(qr_x, y_vec)
-            resids = na.omit(y_vec - x_vec %*% qr_coef)
-            p_val = as.vector(unitrootTest(resids, type="nc")@test$p.value[1])
-          } else {
-            # At least one vector is constant. Print a warning.
-            if (y_sum_diff == 0 && x_sum_diff == 0) {
-              warning(paste(it[1,j], "and", it[2,j], "are constant."))
-            } else if (y_sum_diff == 0) {
-              warning(paste(it[1,j], "is constant."))
-            } else {
-              warning(paste(it[2,j], "is constant."))
-            }
           }
-          p_val
-        })
-        # Check for other problems. 
-        if (inherits(val, "try-error")) {
-          warning(paste("Problem at", it[1,j], it[2,j]))
-          val = NA
-        }
-        m[it[1,j], it[2,j]] = val
+          qr_solve = qr.solve(x_vec, y_vec)
+          qr_coef = qr.coef(qr_x, y_vec)
+          resids = na.omit(y_vec - x_vec %*% qr_coef)
+          if (sum(resids) < 1e-6) {
+            warning("Residuals are zero. Returning NA.")
+            pval = NA
+          } else {
+            p_val = as.vector(unitrootTest(resids, type="nc")@test$p.value[1])
+          }
+        } 
+        m[it[1,j], it[2,j]] = p_val
       }
       m
     }
@@ -113,19 +101,11 @@ cointegration_info= function(x) {
 #' @param interval the width of the cointegration window.
 #' @export
 coint_measure = function(x, interval=minutes(5)) {
-  ci_info=try({
-    foreach(it=inclusive_window_gen(time(x), interval=interval)
-            ) %do% {
-      ret = try({
-        ci = cointegration_info(x[it,])
-        xts(ci$p_stat, order.by=time(x)[tail(it, 1)]) })
-      if (inherits(ret, "try-error")) {
-        print(it)
-        ret = NULL
-      }
-      ret
-    }
-  })
+  ci_info=foreach(it=inclusive_window_gen(time(x), interval=interval)) %do% {
+    a = x[it,]
+    ci = cointegration_info(a)
+    xts(ci$p_stat, order.by=time(x)[tail(it, 1)]) 
+  }
   ret = Reduce(rbind, ci_info)
   indexTZ(ret) = Sys.getenv("TZ")
   colnames(ret) = "p_stat"
