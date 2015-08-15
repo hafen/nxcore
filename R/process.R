@@ -125,7 +125,7 @@ read_taq = function(file_name, symbols=NULL, on="seconds", k=1) {
 
   # Remove bunk trades.
   x = na.omit(x[x$corr == 0 &
-                !(taq$cond %in% c("O","Z","B","T","L","G","W","J","K")),1:5])
+                !(x$cond %in% c("O","Z","B","T","L","G","W","J","K")),1:5])
   x = x[x$size > 0,]
 
   sym_split = split(1:nrow(x), x$symbol)
