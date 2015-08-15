@@ -103,3 +103,73 @@ register_prices = function(x, on="seconds", k=1) {
   ts
 }
 
+#' Go from TAQ file to registered time series
+#' 
+#' @param file_name the name of the taq file
+#' @param symbols the symbols to use
+#' @param on the resolution to consolidate trades. The default is "seconds"
+#' and any resolution supported by the xts::endpoints function is valid.
+#' @param k along every k-th elements. For example if "seconds" is specified 
+#' as the "on" parameter and k=2 then prices are consolidated for every 2 
+#' seconds.
+#' @export
+read_taq = function(file_name, symbols=NULL, on="seconds", k=1) {
+  col_types=c(rep("character",3), rep("numeric", 3), rep("character", 2))
+
+  x = dstrsplit(readAsRaw(file_name), sep=",", skip=1, col_types=col_types)
+
+  names(x) = c("symbol", "date", "time", "price", "size", "corr", "cond", "ex")
+
+  # Filter out the symbols we're not interested in.
+  if (!is.null(symbols)) x = x[x$symbol %in% symbols,]
+
+  # Remove bunk trades.
+  x = na.omit(x[x$corr == 0 &
+                !(taq$cond %in% c("O","Z","B","T","L","G","W","J","K")),1:5])
+  x = x[x$size > 0,]
+
+  sym_split = split(1:nrow(x), x$symbol)
+  x$time_stamp = paste(x$date, x$time)
+  x$date_time=strptime(x$time_stamp, format="%Y%m%d %H:%M:%S", 
+                       tz=Sys.timezone())
+
+  sym_split = split(1:nrow(x), x$symbol)
+  # Create the consolidated trade data.
+  cat("Consolidating trade data\n")
+
+  x=foreach (sym = names(sym_split), .combine=rbind, .inorder=FALSE) %dopar% {
+    registerDoSEQ()
+    d = x[sym_split[[sym]],]
+    ret = NULL
+    if (nrow(d) > 0) {
+      ret = as.data.frame(consolidate_prices(d$date, d$time, d$price, d$size,
+                               time_format="%H:%M:%S", date_format="%Y%m%d",
+                               on="seconds", k=1))
+      ret$symbol = sym
+    }
+    ret
+  }
+
+  x$date_time = strptime(rownames(x), "%Y-%m-%d %H:%M:%S")
+  # Create the xts matrix of stock values.
+  sym_split = split(1:nrow(x), x$symbol)
+  prices = foreach(sym_inds=sym_split, .combine=cbind) %dopar% {
+    xs = x[sym_inds,]
+    xst = xts(xs$price, order.by=xs$date_time)
+    xts(xs$price, order.by=xs$date_time)
+  }
+
+  colnames(prices) = names(sym_split)
+  # Carry prices forward for each column.
+  cat("Carrying prices forward.\n")
+  prices = carry_prices_forward(prices)
+  prices = na.omit(prices)
+
+  prices = period.apply(prices, endpoints(prices, on=on, k=k),
+    function(ps) {
+      xts(matrix(apply(as.matrix(ps), 2, mean, na.rm=TRUE), nrow=1),
+          order.by=time(ps[1]))
+    })
+
+  prices
+}
