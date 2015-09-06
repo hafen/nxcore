@@ -37,6 +37,7 @@ process_cancellations <- function(x) {
   x
 }
 
+
 #' Consolidate prices at a specified resolution
 #' 
 #' @param date transaction date strings
