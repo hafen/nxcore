@@ -57,8 +57,8 @@ process_cancellations <- function(x) {
 #' @examples
 #' # Consolidate TAQ trades...
 #' data(aapl_taq)
-#' ctp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time, 
-#'  aapl_fix$td_price, aapl_fix$td_size, date_format="%Y-%m-%d", 
+#' ctp = consolidate_prices(aapl_taq$sys_date, aapl_taq$sys_time, 
+#'  aapl_taq$td_price, aapl_taq$td_size, date_format="%Y%m%d", 
 #'  time_format="%H:%M:%S")
 #' # or FIX trades...
 #' data(aapl_fix)
@@ -68,8 +68,19 @@ process_cancellations <- function(x) {
 consolidate_prices = function(date, time, price, size, 
   date_format = "%Y-%m-%d", time_format="%H:%M:%OS", on="seconds", k=1) {
   date_time = paste(date, time)
+  if (sum(duplicated(date_time)) > 0) {
+    ds = split(1:length(date_time), date_time)
+    x = foreach(s=ds, .combine=rbind) %do% {
+      data.frame(price=sum(price[s]), size=sum(size[s]))
+    }
+    date_time = names(ds)
+    price = x$price
+    size = x$size
+  }
   date_time = strptime(date_time, paste(date_format, time_format))
+  ps = cbind(price, size)
   x_ts = xts(cbind(price, size), order.by=date_time)
+#  x_ts1 = xts(price, order.by=date_time)
   ret = period.apply(x_ts, endpoints(x_ts, on=on, k=k),
     FUN = function(x) {
       c(sum(x$price*x$size, na.rm=TRUE)/sum(x$size, na.rm=TRUE),
@@ -115,9 +126,10 @@ register_prices = function(x, on="seconds", k=1) {
 #' seconds.
 #' @export
 read_taq = function(file_name, symbols=NULL, on="seconds", k=1) {
-  col_types=c(rep("character",3), rep("numeric", 3), rep("character", 2))
+  #col_types=c(rep("character",3), rep("numeric", 3), rep("character", 2))
+  #dstrsplit(readAsRaw(file_name), sep=",", skip=1, col_types=col_types)
 
-  x = dstrsplit(readAsRaw(file_name), sep=",", skip=1, col_types=col_types)
+  x = read.csv.raw(file_name, header=FALSE, skip=1)
 
   names(x) = c("symbol", "date", "time", "price", "size", "corr", "cond", "ex")
 
@@ -138,6 +150,7 @@ read_taq = function(file_name, symbols=NULL, on="seconds", k=1) {
   # Create the consolidated trade data.
   cat("Consolidating trade data\n")
 
+  if (is.null(getDoParName()) registerDoSEQ() 
   x=foreach (sym = names(sym_split), .combine=rbind, .inorder=FALSE) %dopar% {
     registerDoSEQ()
     d = x[sym_split[[sym]],]

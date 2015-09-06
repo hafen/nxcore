@@ -38,8 +38,8 @@ Consolidate prices at a specified resolution
 \examples{
 # Consolidate TAQ trades...
 data(aapl_taq)
-ctp = consolidate_prices(aapl_fix$sys_date, aapl_fix$sys_time,
- aapl_fix$td_price, aapl_fix$td_size, date_format="\%Y-\%m-\%d",
+ctp = consolidate_prices(aapl_taq$sys_date, aapl_taq$sys_time,
+ aapl_taq$td_price, aapl_taq$td_size, date_format="\%Y\%m\%d",
  time_format="\%H:\%M:\%S")
 # or FIX trades...
 data(aapl_fix)
