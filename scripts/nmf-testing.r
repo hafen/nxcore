@@ -67,3 +67,5 @@ svd_meas = foreach(i=2:10, .combine=rbind) %dopar% {
   c(mean(as.vector(ci_svd)), var(ci_svd-ci1))
 } 
 
+plot(apply(svd_meas, 1, function(x) x[1]^2 + x[2]))
+lines(apply(nmf_meas, 1, function(x) x[1]^2 + x[2]), col="red")
