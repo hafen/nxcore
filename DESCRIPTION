@@ -18,7 +18,8 @@ Depends:
     fUnitRoots (>= 3010.78),
     xts (>= 0.9-7),
     NMF (>= 0.20.6),
-    iotools
+    iotools,
+    lubridate
 Suggests:
     testthat (>= 0.8.1),
     roxygen2 (>= 4.0.0)

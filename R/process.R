@@ -71,16 +71,16 @@ consolidate_prices = function(date, time, price, size,
   if (sum(duplicated(date_time)) > 0) {
     ds = split(1:length(date_time), date_time)
     x = foreach(s=ds, .combine=rbind) %do% {
-      data.frame(price=sum(price[s]), size=sum(size[s]))
+      # VWAP the duplicates.
+      data.frame(price=sum(price[s]*size[s], na.rm=TRUE)/sum(size[s], na.rm=TRUE), 
+                 size=sum(size[s]))
     }
     date_time = names(ds)
     price = x$price
     size = x$size
   }
   date_time = strptime(date_time, paste(date_format, time_format))
-  ps = cbind(price, size)
   x_ts = xts(cbind(price, size), order.by=date_time)
-#  x_ts1 = xts(price, order.by=date_time)
   ret = period.apply(x_ts, endpoints(x_ts, on=on, k=k),
     FUN = function(x) {
       c(sum(x$price*x$size, na.rm=TRUE)/sum(x$size, na.rm=TRUE),
@@ -137,8 +137,8 @@ read_taq = function(file_name, symbols=NULL, on="seconds", k=1) {
   if (!is.null(symbols)) x = x[x$symbol %in% symbols,]
 
   # Remove bunk trades.
-  x = na.omit(x[x$corr == 0 &
-                !(x$cond %in% c("O","Z","B","T","L","G","W","J","K")),1:5])
+  x = na.omit(x[x$corr == 0,1:5]) #&
+#                !(x$cond %in% c("O","Z","B","T","L","G","W","J","K")),1:5])
   x = x[x$size > 0,]
 
   sym_split = split(1:nrow(x), x$symbol)
@@ -150,7 +150,7 @@ read_taq = function(file_name, symbols=NULL, on="seconds", k=1) {
   # Create the consolidated trade data.
   cat("Consolidating trade data\n")
 
-  if (is.null(getDoParName()) registerDoSEQ() 
+  if (is.null(getDoParName())) registerDoSEQ() 
   x=foreach (sym = names(sym_split), .combine=rbind, .inorder=FALSE) %dopar% {
     registerDoSEQ()
     d = x[sym_split[[sym]],]

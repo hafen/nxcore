@@ -21,6 +21,7 @@ cointegration_p_matrix = function(x) {
   r = NA
   x = na.omit(x)
   if (nrow(x) > 0) {
+    if (is.null(colnames(x))) colnames(x) = paste("V", 1:ncol(x), sep="")
     cs = combn(colnames(x), 2)
     if (is.null(getDoParName())) registerDoSEQ()
     r=foreach(it=isplitCols(cs,chunks=getDoParWorkers()),.combine=`+`) %dopar% {
@@ -37,7 +38,7 @@ cointegration_p_matrix = function(x) {
         tol = 1e-8
         x_sum_diff = sum(diff(x_vec[,1]))
         y_sum_diff = sum(diff(y_vec))
-        if (x_sum_diff > tol && y_sum_diff > tol ) {
+        if (abs(x_sum_diff) > tol && abs(y_sum_diff) > tol ) {
           # Neither vector is constant. Test for cointegration.
           qr_x = Matrix::qr(x_vec)
           if (qr_x$rank < 2) {
@@ -47,7 +48,7 @@ cointegration_p_matrix = function(x) {
           qr_solve = qr.solve(x_vec, y_vec)
           qr_coef = qr.coef(qr_x, y_vec)
           resids = na.omit(y_vec - x_vec %*% qr_coef)
-          if (sum(resids) < 1e-6) {
+          if (sum(resids^2) < 1e-6) {
             warning("Residuals are zero. Returning NA.")
             pval = NA
           } else {
@@ -99,10 +100,29 @@ cointegration_info= function(x) {
 #'
 #' @param x an xts object of stock prices.
 #' @param interval the width of the cointegration window.
+#' @param dr the dimension reduction technique: "none", "svd", "nmf"
+#' @param dr_rank if dr is "svd" or "nmf" then this specifies the rank of the subspace
+#' to project onto.
 #' @export
-coint_measure = function(x, interval=minutes(5)) {
+coint_measure = function(x, interval=minutes(5), dr=c("none", "svd", "nmf"), dr_rank) {
+  if (!(dr %in% c("none", "svd", "nmf"))) stop("Unknown dimension reduction type")
+  if (dr != "none" && missing(dr_rank)) stop("You must specify a rank for dimension reduction")
+
+  dr_fun = switch(dr,
+    "none" = function(x) x,
+    "svd" = function(x) {
+      x_mat = as.matrix(x)
+      x_ret = x_mat %*% svd(x_mat)$v[,1:dr_rank]
+      xts(x_ret, order.by=time(x))
+    },
+    "nmf" = function(x) {
+      x_mat = as.matrix(x)
+      x_ret = tcrossprod(x_mat, nmf(x_mat, rank=dr_rank)@fit@H)
+      xts(x_ret, order.by=time(x))
+    })
+
   ci_info=foreach(it=inclusive_window_gen(time(x), interval=interval)) %do% {
-    a = x[it,]
+    a = dr_fun(x[it,])
     ci = cointegration_info(a)
     xts(ci$p_stat, order.by=time(x)[tail(it, 1)]) 
   }
