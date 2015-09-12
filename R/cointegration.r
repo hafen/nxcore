@@ -24,7 +24,7 @@ cointegration_p_matrix = function(x) {
     if (is.null(colnames(x))) colnames(x) = paste("V", 1:ncol(x), sep="")
     cs = combn(colnames(x), 2)
     if (is.null(getDoParName())) registerDoSEQ()
-    r=foreach(it=isplitCols(cs,chunks=getDoParWorkers()),.combine=`+`) %dopar% {
+    r=foreach(it=isplitCols(cs,chunks=getDoParWorkers()),.combine=`+`) %do% {
       # Create the sparse matrix for this process.
       m = Matrix(data=0, nrow=ncol(x), ncol=ncol(x), sparse=TRUE,
                  dimnames=list(names(x), names(x)))
@@ -104,11 +104,14 @@ cointegration_info= function(x) {
 #' @param dr_rank if dr is "svd" or "nmf" then this specifies the rank of the subspace
 #' to project onto.
 #' @export
-coint_measure = function(x, interval=minutes(5), dr=c("none", "svd", "nmf"), dr_rank) {
-  if (!(dr %in% c("none", "svd", "nmf"))) stop("Unknown dimension reduction type")
-  if (dr != "none" && missing(dr_rank)) stop("You must specify a rank for dimension reduction")
+coint_measure = function(x, interval=minutes(5), dr=c("none", "svd", "nmf"), 
+                         dr_rank) {
+  if (!(dr[1] %in% c("none", "svd", "nmf"))) 
+    stop("Unknown dimension reduction type")
+  if (dr != "none" && missing(dr_rank)) 
+    stop("You must specify a rank for dimension reduction")
 
-  dr_fun = switch(dr,
+  dr_fun = switch(dr[1],
     "none" = function(x) x,
     "svd" = function(x) {
       x_mat = as.matrix(x)
@@ -121,7 +124,7 @@ coint_measure = function(x, interval=minutes(5), dr=c("none", "svd", "nmf"), dr_
       xts(x_ret, order.by=time(x))
     })
 
-  ci_info=foreach(it=inclusive_window_gen(time(x), interval=interval)) %do% {
+  ci_info=foreach(it=inclusive_window_gen(time(x), interval=interval)) %dopar% {
     a = dr_fun(x[it,])
     ci = cointegration_info(a)
     xts(ci$p_stat, order.by=time(x)[tail(it, 1)]) 

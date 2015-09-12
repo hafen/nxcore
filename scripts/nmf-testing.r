@@ -1,7 +1,7 @@
 # Basic proof of concept to show how the correlation structure is preserved using NMF.
 library(devtools)
 
-taq_file = "taq_20100506_trades_all.csv"
+taq_file = "~/projects/jackson_lecture/may_trades/taq_20100506_trades_all.csv"
 
 #document("..")
 library(nxcore)
@@ -56,16 +56,28 @@ lines(dm[,3], col="green")
 lines(dm[,4], col="grey")
 
 library(doMC)
-registerDoMC(3)
+registerDoMC(4)
 nmf_meas = foreach(i=2:10, .combine=rbind) %dopar% {
   ci_nmf = coint_measure(x, minutes(30), dr="nmf", dr_rank=i)
-  c(mean(as.vector(ci_nmf)), var(ci_svd-ci1))
+  c(mean(as.vector(ci_nmf)-ci1), var(ci_nmf-ci1))
 } 
 
 svd_meas = foreach(i=2:10, .combine=rbind) %dopar% {
   ci_svd = coint_measure(x, minutes(30), dr="svd", dr_rank=i)
-  c(mean(as.vector(ci_svd)), var(ci_svd-ci1))
+  c(mean(as.vector(ci_svd)-ci1), var(ci_svd-ci1))
 } 
 
-plot(apply(svd_meas, 1, function(x) x[1]^2 + x[2]))
-lines(apply(nmf_meas, 1, function(x) x[1]^2 + x[2]), col="red")
+# NMF wins both for bias and variance.
+plot(nmf_meas[,1], type="l", ylim=range(c(svd_meas[,1], nmf_meas[,1])))
+lines(svd_meas[,1], col="red")
+dev.new()
+plot(nmf_meas[,2], type="l", ylim=range(c(svd_meas[,2], nmf_meas[,2])))
+lines(svd_meas[,2], col="red")
+
+nmf_meas = foreach(i=2:20, .combine=rbind) %do% {
+  print(
+    system.time({ci_nmf = coint_measure(x, minutes(30), dr="nmf", dr_rank=i)}))
+  print(i)
+  c(mean(as.vector(ci_nmf)-ci1), var(ci_nmf-ci1))
+} 
+
