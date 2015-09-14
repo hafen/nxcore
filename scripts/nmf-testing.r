@@ -56,13 +56,13 @@ lines(dm[,3], col="green")
 lines(dm[,4], col="grey")
 
 library(doMC)
-registerDoMC(4)
-nmf_meas = foreach(i=2:10, .combine=rbind) %dopar% {
+registerDoMC(3)
+nmf_meas = foreach(i=2:10, .combine=rbind) %do% {
   ci_nmf = coint_measure(x, minutes(30), dr="nmf", dr_rank=i)
   c(mean(as.vector(ci_nmf)-ci1), var(ci_nmf-ci1))
 } 
 
-svd_meas = foreach(i=2:10, .combine=rbind) %dopar% {
+svd_meas = foreach(i=2:10, .combine=rbind) %do% {
   ci_svd = coint_measure(x, minutes(30), dr="svd", dr_rank=i)
   c(mean(as.vector(ci_svd)-ci1), var(ci_svd-ci1))
 } 
@@ -75,6 +75,17 @@ plot(nmf_meas[,2], type="l", ylim=range(c(svd_meas[,2], nmf_meas[,2])))
 lines(svd_meas[,2], col="red")
 
 nmf_meas = foreach(i=2:20, .combine=rbind) %do% {
+  print(
+    system.time({ci_nmf = coint_measure(x, minutes(30), dr="nmf", dr_rank=i)}))
+  print(i)
+  c(mean(as.vector(ci_nmf)-ci1), var(ci_nmf-ci1))
+} 
+
+
+# Let's try all of them.
+registerDoMC(3)
+x = read_taq(taq_file, sp$symbol, on="minutes", k=1)
+nmf_meas_sp = foreach(i=2:15, .combine=rbind) %do% {
   print(
     system.time({ci_nmf = coint_measure(x, minutes(30), dr="nmf", dr_rank=i)}))
   print(i)
