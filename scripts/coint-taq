@@ -1,0 +1,41 @@
+#!/usr/bin/env Rscript
+
+suppressMessages(library(docopt))
+suppressMessages(library(nxcore))
+suppressMessages(library(foreach))
+suppressMessages(library(doMC))
+
+"
+Get the measure of cointegration among a basket of stocks in the SP500
+
+Usage:
+  coint-taq -h
+  coint-taq TAQ_CSV [-t TIME_RES] [-k K] [-c COINT_RES] [-l COINT_L] [-s STOCKS] [-o OUT_FILE] [-p NUM_PROCS] [-d DATE_FORMAT] [-t TIME_FORMAT] 
+Arguments:
+  TAQ_CSV                       the TAQ file.
+
+Options:
+  -h, --help                     show this message and exit
+  -t, --time-resolution=TIME_RES the time resolution to consolidate trades on
+                                 [default: minutes]
+  -k, --time-k=K                 consolidate every k trades at specified 
+                                 resolution [default: 1]
+  -c, --coint-res=COINT_RES      the time resolution to perform the 
+                                 cointegration [default: minutes]
+  -l, --coint-l=COINT_L          cointegration every l trades at specified 
+                                 resolution [default: 30]
+  -s, --stocks=STOCKS            a comma-separated list of stocks 
+  -o, --output-file=OUT_FILE     the output file name [default: coint-out.csv]
+  -p, --parallel=NUM_PROCS       the number of parallel processes to use
+                                 [default: 1]
+  -d, --date-format=DATE_FORMAT  the date format [default: %Y%m%d]
+  -t, --time-format=TIME_FORMAT  the time format [default: %H:%M:%S]
+" -> usage
+
+args = docopt(usage, strict=FALSE)
+print(args)
+
+symbols = unlist(strsplit(unlist(gsub(" ", "", args[['--stocks']])), ","))
+x = read_taq(args[['TAQ_CSV']], symbols, on=args[['--time-resolution']],
+             k=as.integer(args[['time-k]]))
+

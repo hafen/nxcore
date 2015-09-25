@@ -55,8 +55,7 @@ lines(dm[,2], col="blue")
 lines(dm[,3], col="green")
 lines(dm[,4], col="grey")
 
-library(doMC)
-registerDoMC(3)
+#library(doMC); registerDoMC(3)
 nmf_meas = foreach(i=2:10, .combine=rbind) %do% {
   ci_nmf = coint_measure(x, minutes(30), dr="nmf", dr_rank=i)
   c(mean(as.vector(ci_nmf)-ci1), var(ci_nmf-ci1))
@@ -83,7 +82,7 @@ nmf_meas = foreach(i=2:20, .combine=rbind) %do% {
 
 
 # Let's try all of them.
-registerDoMC(3)
+#registerDoMC(3)
 x = read_taq(taq_file, sp$symbol, on="minutes", k=1)
 nmf_meas_sp = foreach(i=2:15, .combine=rbind) %do% {
   print(
