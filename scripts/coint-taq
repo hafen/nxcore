@@ -38,4 +38,6 @@ print(args)
 symbols = unlist(strsplit(unlist(gsub(" ", "", args[['--stocks']])), ","))
 x = read_taq(args[['TAQ_CSV']], symbols, on=args[['--time-resolution']],
              k=as.integer(args[['time-k]]))
+ci_res = paste(args[['--coint-res']], "(", args[['--coint-l']], ")", sep="")
+ci_nmf = coint_measure(x, eval(parse(text=ci_res)), dr="nmf", dr_rank=10)
 
